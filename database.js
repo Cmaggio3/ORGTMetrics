@@ -1,21 +1,10 @@
 var mysql = require('mysql');
 
-
-
-/*
-var db_config = {
-	host: "az1-ss18.a2hosting.com",
-	user: "jacobsla_Admin",
-	password: "JacobsLadderGT2019",
-	database: "jacobsla_jacobsLadder",
-    debug    :  true
-}
-*/
 var db_config = {
 	host:"orgtdata.c5xkty4e7x1f.us-east-2.rds.amazonaws.com",
 	user: "admin",
 	password: "Testtobechanged12",
-	database: "orgtdata",
+	//database: "orgtdata",
     debug    :  true
 }
 
