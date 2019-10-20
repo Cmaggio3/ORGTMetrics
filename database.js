@@ -4,7 +4,7 @@ var db_config = {
 	host:"orgtdata.c5xkty4e7x1f.us-east-2.rds.amazonaws.com",
 	user: "admin",
 	password: "Testtobechanged12",
-	database: "orgtdata",
+	database: "data",
     debug    :  true
 }
 
