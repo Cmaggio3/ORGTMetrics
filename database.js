@@ -15,7 +15,7 @@ var db_config = {
 	host:"database-2.c5xkty4e7x1f.us-east-2.rds.amazonaws.com",
 	user: "admin",
 	password: "Testtobechanged12",
-	database: "database-2",
+	//database: "database-2",
     debug    :  true
 }
 
