@@ -12,11 +12,11 @@ var db_config = {
 }
 */
 var db_config = {
-	host:"jacobsladderintaketeam.cik1yin3pif1.us-east-1.rds.amazonaws.com",
-	user: "intaketeam",
-	password: "IwantanA123",
-	database: "jacobsla_jacobsLadder",
-    debug    :  true	
+	host:"database-2.c5xkty4e7x1f.us-east-2.rds.amazonaws.com",
+	user: "Admin",
+	password: "Testtobechanged12",
+	database: "database-2",
+    debug    :  true
 }
 
 
@@ -29,11 +29,11 @@ function handleDisconnect() {
   if(connection) connection.destroy()
   connection = mysql.createPool(db_config); // Recreate the connection, since
                                                   // the old one cannot be reused
-												  
-												  
+
+
 	console.log(db_config)
-												  
-												  
+
+
   connection.getConnection(function(err) {              // The server is either down
     if(err) {                                     // or restarting (takes a while sometimes).
       console.log('error when connecting to db:', err);
@@ -50,12 +50,12 @@ function handleDisconnect() {
       throw err;                                  // server variable configures this)
     }
   });
-  
+
   	connection.query('select 1', function(err, results) {
         if (err) console.log('SELECT', err.code);
         else console.log('SELECT', results);
     });
-  
+
 }
 
 
@@ -77,11 +77,11 @@ function handleDisconnect() {
   if(connection) connection.destroy()
   connection = mysql.createConnection(db_config); // Recreate the connection, since
                                                   // the old one cannot be reused
-												  
-												  
+
+
 	console.log(db_config)
-												  
-												  
+
+
   connection.connect(function(err) {              // The server is either down
     if(err) {                                     // or restarting (takes a while sometimes).
       console.log('error when connecting to db:', err);
@@ -98,12 +98,12 @@ function handleDisconnect() {
       throw err;                                  // server variable configures this)
     }
   });
-  
+
   	connection.query('select 1', function(err, results) {
         if (err) console.log('SELECT', err.code);
         else console.log('SELECT', results);
     });
-  
+
 }
 */
 
