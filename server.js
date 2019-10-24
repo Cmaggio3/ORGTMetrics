@@ -9,7 +9,7 @@ var mysql   = require("mysql");
 var bodyParser  = require("body-parser");
 var md5 = require('MD5');
 var config = require('./config');
-var config = require('./database');  
+var config = require('./database');
 
 var verifyToken = require('./middleware/verifyToken');
 var addNewUser = require('./middleware/addNewUser');
@@ -23,6 +23,7 @@ var findChildsForm = require('./middleware/findChildsForm');
 var addNewChild = require('./middleware/addNewChild');
 var sendChildsForm = require('./middleware/sendChildsForm');
 var userSecurityQuestionCheck = require('./middleware/userSecurityQuestionCheck');
+var fullRoster = require('./middleware/fullRoster');
 
 
 var port = process.env.PORT || 4200;
@@ -47,13 +48,13 @@ app.post('/userlogin', userLoginCheck);
 app.post('/userSecurityQuestion',userSecurityQuestionCheck);
 app.post('/children/',addNewChild);
 
-
+app.get('/roster/',fullRoster);
 
 var apiRoutes = express.Router();
 
 apiRoutes.use(bodyParser.urlencoded({ extended: true }));
 apiRoutes.use(bodyParser.json());
-//route middleware to verify a token 
+//route middleware to verify a token
 apiRoutes.use(verifyToken);
 apiRoutes.get('/', welcome);
 apiRoutes.get('/users', findAllUsers);
