@@ -4,7 +4,7 @@ var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 var config = require('../config');
 var connection = require("../database");
 
-var findUser = function (req, res) {
+var fullRoster = function (req, res) {
     var query = "SELECT * FROM Roster";
     connection.query(query, function(err, rows) {
         if (err) {
