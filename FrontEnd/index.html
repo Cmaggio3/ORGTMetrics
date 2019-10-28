@@ -18,11 +18,11 @@
                         //this will be triggered before sending the ajax request
                         console.log('Sending AJAX Request...');
                     },
-                    success: function(response,data){
+                    success: function(response){
                         //this will be triggered when the request successfully gets completed
                         //console.log(response.User);
-
-                        dates = [new Date(2011,01,27), new Date(2012,2,29), new Date(2012,08,01)]
+                        dates = [new Date(2011,1,27), new Date(2012,2,29), new Date(2012,8,1)]
+                        end_dates = [new Date(2012,3,1), new Date(2013, 3, 1), new Date(2013, 8, 1)]
 
                         dataPoints = [];
 
@@ -36,11 +36,43 @@
 
 
                         numIIT = 0;
+                        var monthHead = new Date()
+                        var monthList = []
+                        
+                        while (numIIT < 3){//var i in response.User) {
+                            if (true) {//(response.User[i]['IIT MOU Signed'] != "" && response.User[i]['Grad Date'] != ""){
+                                start = dates[numIIT]//new Date(response.User[i]['IIT MOU Signed'])
+                                end = end_dates[numIIT]//new Date(response.User[i]['Grad Date'])
+                                //console.log(dateDistance(start, monthHead))
+                                if (dateDistance(start, monthHead) < 0){
+                                    var expands = dateDistance(monthHead, start)
+                                    for (var i = 0; i < expands; i++){
+                                        monthList.unshift(0)
+                                    }
+                                    monthHead = start
+                                }
+                                var startInd = dateDistance(start, monthHead)
+                                var endInd = dateDistance(end, monthHead)
+                                //console.log(startInd)
+                                //console.log(endInd)
+                                expands = endInd - monthList.length
+                                for (var i = 0; i < expands; i++) {
+                                    monthList.push(0)
+                                }
+                                for (var i = startInd; i <= endInd; i++) {
+                                    monthList[i] = monthList[i] + 1
+                                }
 
-                        for (var i in response.User) {
-                            if(response.User[i]['IIT MOU Signed'] != ""){
-                                dataPoints.push({x: new Date(response.User[i]['IIT MOU Signed']), y: ++numIIT});
                             }
+                            numIIT++
+                        }
+                        //console.log(monthList)
+
+                        for (var i = 0; i < monthList.length; i++) {
+                            var monthDate = new Date()
+                            monthDate.setMonth((monthHead.getMonth() + i) % 12)
+                            monthDate.setYear((monthHead.getFullYear())+ (i/12))
+                            dataPoints.push({x: monthDate, y: monthList[i]})
                         }
 
 
@@ -68,7 +100,11 @@
             }
 
 
-
+            function dateDistance(date1, date2){
+                var yearDif = date1.getFullYear() - date2.getFullYear()
+                var monthDif = date1.getMonth() - date2.getMonth()
+                return yearDif * 12 + monthDif
+            }
 
             window.onload = function() {
 
