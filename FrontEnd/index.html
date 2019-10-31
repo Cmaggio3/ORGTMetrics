@@ -21,11 +21,18 @@
                     success: function(response){
                         //this will be triggered when the request successfully gets completed
                         //console.log(response.User);
-                        generateChart(response, "All ORGT Members")
+                        generateChart(response.User, "All ORGT Members")
+                        sports = parseDataBySport(response)
+                        console.log(sports)
+                        keys = Object.keys(sports)
+                        //for (sport in keys) {
+                        //    generateChart(sports[sport], sport)
+                        //}
+                        generateChart(sports["Sea Kayaking"], "Sea Kayaking")
                         
                     },
                     error: function(){
-                        //this will be triggered when the request fails
+                        //this will be triggered when the request fails 
                         console.log('Request Failed.');
                     }
                 });
@@ -72,7 +79,8 @@
                     }
                 ];
 
-                
+                //chartDiv = document.createElement("div")
+                //chartDiv.setAttribute('id', name)
 
 
                 var chart = new CanvasJS.Chart("chartContainer", {
@@ -101,15 +109,15 @@
             }
 
             function getDataPoints(response, start_classifier, end_classifier) {
-                console.log("begins method")
+                //console.log("begins method")
                 var monthHead = new Date()
                 var monthList = []
                 var dataPoints = []
                 
-                for(var i in response.User) {
-                    if (response.User[i][start_classifier] != "" && response.User[i][end_classifier] != ""){
-                        start = new Date(response.User[i][start_classifier])
-                        end = new Date(response.User[i][end_classifier])
+                for(var i in response) {
+                    if (response[i][start_classifier] != "" && response[i][end_classifier] != ""){
+                        start = new Date(response[i][start_classifier])
+                        end = new Date(response[i][end_classifier])
                         //console.log(dateDistance(start, monthHead))
                         if (dateDistance(start, monthHead) < 0){
                             var expands = dateDistance(monthHead, start)
@@ -166,6 +174,30 @@
                     }
                 }
                 return newDataPoints
+            }
+
+            function parseDataBySport(response) {
+                sports = {}
+                for (var i in response.User) {
+                    var sport = response.User[i]['Sport']
+                    if (sport != "") {
+                        //console.log(Object.keys(sports))
+                        var keys = Object.keys(sports)
+                        //console.log(sport in keys)
+                        //console.log(typeof sports[sport])
+                        if (typeof sports[sport] === "object") {
+                            //console.log(sports[sport])
+                            var holder = sports[sport]
+                            holder.push(response.User[i])
+                            sports[sport] = holder
+                            //console.log(sports[sport])
+                        } else {
+                            sports[sport] = [response.User[i]]
+                        }
+
+                    }
+                }
+                return sports
             }
 
             window.onload = function() {
