@@ -21,76 +21,8 @@
                     success: function(response){
                         //this will be triggered when the request successfully gets completed
                         //console.log(response.User);
-                        dates = [new Date(2011,1,27), new Date(2012,2,29), new Date(2012,8,1)]
-                        end_dates = [new Date(2012,3,1), new Date(2013, 3, 1), new Date(2013, 8, 1)]
-
-                        dataPoints = [];
-
-                        data = [
-                            {
-                                type: "line",
-                                dataPoints: dataPoints,
-                                showInLegend: true
-                            }
-                        ];
-
-
-                        numIIT = 0;
-                        var monthHead = new Date()
-                        var monthList = []
+                        generateChart(response, "All ORGT Members")
                         
-                        while (numIIT < 3){//var i in response.User) {
-                            if (true) {//(response.User[i]['IIT MOU Signed'] != "" && response.User[i]['Grad Date'] != ""){
-                                start = dates[numIIT]//new Date(response.User[i]['IIT MOU Signed'])
-                                end = end_dates[numIIT]//new Date(response.User[i]['Grad Date'])
-                                //console.log(dateDistance(start, monthHead))
-                                if (dateDistance(start, monthHead) < 0){
-                                    var expands = dateDistance(monthHead, start)
-                                    for (var i = 0; i < expands; i++){
-                                        monthList.unshift(0)
-                                    }
-                                    monthHead = start
-                                }
-                                var startInd = dateDistance(start, monthHead)
-                                var endInd = dateDistance(end, monthHead)
-                                //console.log(startInd)
-                                //console.log(endInd)
-                                expands = endInd - monthList.length
-                                for (var i = 0; i < expands; i++) {
-                                    monthList.push(0)
-                                }
-                                for (var i = startInd; i <= endInd; i++) {
-                                    monthList[i] = monthList[i] + 1
-                                }
-
-                            }
-                            numIIT++
-                        }
-                        //console.log(monthList)
-
-                        for (var i = 0; i < monthList.length; i++) {
-                            var monthDate = new Date()
-                            monthDate.setMonth((monthHead.getMonth() + i) % 12)
-                            monthDate.setYear((monthHead.getFullYear())+ (i/12))
-                            dataPoints.push({x: monthDate, y: monthList[i]})
-                        }
-
-
-                        var chart = new CanvasJS.Chart("chartContainer", {
-                            animationEnabled: true,
-                            theme: "light2",
-                            title:{
-                                text: "Simple Line Chart"
-                            },
-                            axisY:{
-                                includeZero: false
-                            },
-                            data: data
-                        });
-
-
-
-                        chart.render();
                     },
                     error: function(){
                         //this will be triggered when the request fails
@@ -99,11 +31,141 @@
                 });
             }
 
+            function generateChart(response, name) {
+                dataPoints = getDataPoints(response, 'IIT MOU Signed', 'Grad Date')
+                //console.log(dataPoints)
+                dataPoints2 = getDataPoints(response, 'Ins MOU Signed', 'Grad Date')
+                dataPoints3 = getDataPoints(response, 'TL MOU Signed', 'Grad Date')
+                dataPoints4 = getDataPoints(response, 'STL Promotion', 'Grad Date')
+
+                dataPoints = subtractDataVals(dataPoints, dataPoints2)
+                //console.log(dataPoints)
+                dataPoints2 = subtractDataVals(dataPoints2, dataPoints3)
+                //console.log(dataPoints2)
+                dataPoints3 = subtractDataVals(dataPoints3, dataPoints4)
+                //console.log(dataPoints3)
+
+                data = [
+                    {
+                        type: "line",
+                        dataPoints: dataPoints,
+                        name: "Instructors in Training",
+                        showInLegend: true
+                    },
+                    {
+                        type: "line",
+                        dataPoints: dataPoints2,
+                        name: "Instructors",
+                        showInLegend: true
+                    },
+                    {
+                        type: "line",
+                        dataPoints: dataPoints3,
+                        name: "Trip Leads",
+                        showInLegend: true
+                    }, 
+                    {
+                        type: "line",
+                        dataPoints: dataPoints4,
+                        name: "Senior Trip Leads",
+                        showInLegend: true
+                    }
+                ];
+
+                
+
+
+                var chart = new CanvasJS.Chart("chartContainer", {
+                    animationEnabled: true,
+                    theme: "light2",
+                    title:{
+                        text: name                            },
+                    axisY:{
+                        includeZero: false
+                    },
+                    data: data
+                });
+
+
+
+                chart.render();
+            }
+
+
+
 
             function dateDistance(date1, date2){
                 var yearDif = date1.getFullYear() - date2.getFullYear()
                 var monthDif = date1.getMonth() - date2.getMonth()
                 return yearDif * 12 + monthDif
+            }
+
+            function getDataPoints(response, start_classifier, end_classifier) {
+                console.log("begins method")
+                var monthHead = new Date()
+                var monthList = []
+                var dataPoints = []
+                
+                for(var i in response.User) {
+                    if (response.User[i][start_classifier] != "" && response.User[i][end_classifier] != ""){
+                        start = new Date(response.User[i][start_classifier])
+                        end = new Date(response.User[i][end_classifier])
+                        //console.log(dateDistance(start, monthHead))
+                        if (dateDistance(start, monthHead) < 0){
+                            var expands = dateDistance(monthHead, start)
+                            for (var i = 0; i < expands; i++){
+                                monthList.unshift(0)
+                            }
+                            monthHead = start
+                        }
+                        var startInd = dateDistance(start, monthHead)
+                        var endInd = dateDistance(end, monthHead)
+                        //console.log(startInd)
+                        //console.log(endInd)
+                        expands = endInd - monthList.length
+                        for (var i = 0; i < expands; i++) {
+                            monthList.push(0)
+                        }
+                        for (var i = startInd; i <= endInd; i++) {
+                            monthList[i] = monthList[i] + 1
+                        }
+
+                    }
+                }
+                //console.log(monthList)
+
+                for (var i = 0; i < monthList.length; i++) {
+                    var monthDate = new Date()
+                    monthDate.setDate(1)
+                    monthDate.setMonth((monthHead.getMonth() + i) % 12)
+                    monthDate.setYear((monthHead.getFullYear())+ ((monthHead.getMonth() + i)/12))
+                    dataPoints.push({x: monthDate, y: monthList[i]})
+                }
+                //console.log(dataPoints)
+                return dataPoints;
+            }
+
+            //A - B assume B c A
+            function subtractDataVals(pointsA, pointsB) {
+                var counter = 0
+                var newDataPoints = []
+                for (var i = 0; i < pointsA.length; i++) {
+                    if (counter >= pointsB.length) {
+                        newDataPoints.push(pointsA[i])
+                    } else {
+                        var a = pointsA[i]['x']
+                        //console.log(a)
+                        var b = pointsB[counter]['x']
+                        //console.log(b)
+                        if (a.getMonth() == b.getMonth() && a.getFullYear() == b.getFullYear()) {
+                            newDataPoints.push({x: a, y: pointsA[i]['y'] - pointsB[counter]['y']})
+                            counter = counter + 1
+                        } else {
+                            newDataPoints.push(pointsA[i])
+                        }
+                    }
+                }
+                return newDataPoints
             }
 
             window.onload = function() {
