@@ -24,7 +24,7 @@ var addNewChild = require('./middleware/addNewChild');
 var sendChildsForm = require('./middleware/sendChildsForm');
 var userSecurityQuestionCheck = require('./middleware/userSecurityQuestionCheck');
 var fullRoster = require('./middleware/fullRoster');
-
+var tripReports = require('./middleware/tripReports');
 
 var port = process.env.PORT || 4200;
 
@@ -49,6 +49,7 @@ app.post('/userSecurityQuestion',userSecurityQuestionCheck);
 app.post('/children/',addNewChild);
 
 app.get('/roster/',fullRoster);
+app.get('/reports/',tripReports);
 
 var apiRoutes = express.Router();
 
