@@ -10,7 +10,7 @@ var tripReports = function (req, res) {
         if (err) {
 			res.json({"Error" : true, "Message" : "Error executing MySQL query"});
         } else {
-			res.json({"Error" : false,"Message" : "Success", "User" : rows});
+			res.json({"Error" : false,"Message" : "Success", "Reports" : rows});
         }
     });
 };
