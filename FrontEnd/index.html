@@ -23,12 +23,13 @@
                         //console.log(response.User);
                         generateChart(response.User, "All ORGT Members")
                         sports = parseDataBySport(response)
-                        console.log(sports)
+                        //console.log(sports)
                         keys = Object.keys(sports)
-                        //for (sport in keys) {
-                        //    generateChart(sports[sport], sport)
-                        //}
-                        generateChart(sports["Sea Kayaking"], "Sea Kayaking")
+                        //console.log(keys)
+                        for (sport in keys) {
+                            generateChart(sports[keys[sport]], keys[sport])
+                        }
+                        //generateChart(sports["Sea Kayaking"], "Sea Kayaking")
                         
                     },
                     error: function(){
@@ -39,11 +40,16 @@
             }
 
             function generateChart(response, name) {
-                dataPoints = getDataPoints(response, 'IIT MOU Signed', 'Grad Date')
+                var dataPoints = getDataPoints(response, 'IIT MOU Signed', 'Final Date')
+                //console.log(name)
                 //console.log(dataPoints)
-                dataPoints2 = getDataPoints(response, 'Ins MOU Signed', 'Grad Date')
-                dataPoints3 = getDataPoints(response, 'TL MOU Signed', 'Grad Date')
-                dataPoints4 = getDataPoints(response, 'STL Promotion', 'Grad Date')
+
+                if (dataPoints.length <= 0) {
+                    return
+                }
+                var dataPoints2 = getDataPoints(response, 'Ins MOU Signed', 'Final Date')
+                var dataPoints3 = getDataPoints(response, 'TL MOU Signed', 'Final Date')
+                var dataPoints4 = getDataPoints(response, 'STL Promotion', 'Final Date')
 
                 dataPoints = subtractDataVals(dataPoints, dataPoints2)
                 //console.log(dataPoints)
@@ -51,13 +57,29 @@
                 //console.log(dataPoints2)
                 dataPoints3 = subtractDataVals(dataPoints3, dataPoints4)
                 //console.log(dataPoints3)
+                now1 = getCurrentMonthIndex(dataPoints)
+                now2 = getCurrentMonthIndex(dataPoints2)
+                now3 = getCurrentMonthIndex(dataPoints3)
+                now4 = getCurrentMonthIndex(dataPoints4)
+                m1 = Math.max(dataPoints.length - now1, dataPoints2.length -now2)
+                m2 = Math.max(dataPoints3.length - now3, dataPoints4.length - now4)
+                m = Math.max(m1, m2)
+                m = Math.min(m, 48)
+
+
+                var expectationPoints = steadyMembersOutlook(dataPoints, 36, m)
+                //console.log(expectationPoints)
+                var expectationPoints2 = steadyMembersOutlook(dataPoints2, 36, m)
+                var expectationPoints3 = steadyMembersOutlook(dataPoints3, 36, m)
+                var expectationPoints4 = steadyMembersOutlook(dataPoints4, 36, m)
+                
 
                 data = [
                     {
                         type: "line",
                         dataPoints: dataPoints,
                         name: "Instructors in Training",
-                        showInLegend: true
+                        showInLegend: true,
                     },
                     {
                         type: "line",
@@ -76,14 +98,45 @@
                         dataPoints: dataPoints4,
                         name: "Senior Trip Leads",
                         showInLegend: true
+                    }, 
+                    {
+                        type: "line",
+                        dataPoints: expectationPoints,
+                        name: "Needed IIT's",
+                        showInLegend: true,
+                        lineDashType: "dash",
+                    }, 
+                    {
+                        type: "line",
+                        dataPoints: expectationPoints2,
+                        name: "Needed Instructors",
+                        showInLegend: true,
+                        lineDashType: "dash",
+                    }, 
+                    {
+                        type: "line",
+                        dataPoints: expectationPoints3,
+                        name: "Needed TL's",
+                        showInLegend: true,
+                        lineDashType: "dash",
+                    }, 
+                    {
+                        type: "line",
+                        dataPoints: expectationPoints4,
+                        name: "Needed STL's",
+                        showInLegend: true,
+                        lineDashType: "dash",
                     }
                 ];
 
-                //chartDiv = document.createElement("div")
-                //chartDiv.setAttribute('id', name)
+                chartDiv = document.createElement("div")
+                chartDiv.setAttribute('id', name)
+                chartDiv.setAttribute('class', "child")
+                chartDiv.setAttribute('style', "height: 300px; width: 100%;")
+                document.getElementById("big").appendChild(chartDiv);
 
 
-                var chart = new CanvasJS.Chart("chartContainer", {
+                var chart = new CanvasJS.Chart(name, {
                     animationEnabled: true,
                     theme: "light2",
                     title:{
@@ -97,6 +150,12 @@
 
 
                 chart.render();
+
+                var diffName = name + " Differences"
+                var diffData = [dataPoints, dataPoints2, dataPoints3, dataPoints4]
+                var diffExpect = [expectationPoints, expectationPoints2, expectationPoints3, expectationPoints4]
+
+                generateDifferenceGraph(diffData, diffExpect, diffName)
             }
 
 
@@ -199,6 +258,138 @@
                 }
                 return sports
             }
+            //where p is the number of months we would like to look in the past
+            function steadyMembersOutlook(dataPoints, p, f) {
+                //console.log(dataPoints)
+                var now = getCurrentMonthIndex(dataPoints)
+                if (now == -1) {
+                    return
+                }
+                //console.log(now)
+                var count = 0
+                var sum = 0
+                var max = Math.max(0, now - p);
+                for (var i = max; i <= now; i++) {
+                    sum += dataPoints[i]['y'] 
+                    count = i + 1
+                }
+                //console.log(sum)
+                //console.log(count)
+                var avg = Math.floor(sum/Math.min(p, now))
+                var expectationPoints = []
+                var temp = dataPoints[now]['x']
+                for (var i = now; i < f + dataPoints.length; i++) {
+                    //console.log(dataPoints[i])
+                    if (i < dataPoints) {
+                        temp = dataPoints[i]['x']
+                        expectationPoints.push({x: temp, y: avg})
+                    } else {
+                        monthDate = new Date()
+                        monthDate.setDate(1)
+                        monthDate.setMonth((temp.getMonth() + 1) % 12)
+                        monthDate.setYear((temp.getFullYear())+ ((temp.getMonth() + 1)/12))
+                        expectationPoints.push({x: monthDate, y: avg})
+                        temp = monthDate
+
+                    }
+                }
+                return expectationPoints
+            }
+
+            function getCurrentMonthIndex(dataPoints) {
+                var now = new Date();
+                for (var i = 0; i < dataPoints.length; i++) {
+                    var examine = dataPoints[i]['x'];
+                    var month = examine.getMonth() == now.getMonth()
+                    var year = examine.getFullYear() == now.getFullYear()
+                    //console.log("month")
+                    //console.log(month)
+                    //console.log("year")
+                    //console.log(year)
+                    if (month && year) {
+                        return i;
+                    }
+                }
+                return -1
+            }
+
+            //assume length of both is 4
+            function generateDifferenceGraph(dataPointsArray, expectationPointsArray, name) {
+                if (dataPointsArray.length != 4 || expectationPointsArray.length != 4) {
+                    return
+                }
+                differencePoints1 = generateDifferencePoints(dataPointsArray[0], expectationPointsArray[0], getCurrentMonthIndex(dataPointsArray[0]))
+                differencePoints2 = generateDifferencePoints(dataPointsArray[1], expectationPointsArray[1], getCurrentMonthIndex(dataPointsArray[1]))
+                differencePoints3 = generateDifferencePoints(dataPointsArray[2], expectationPointsArray[2], getCurrentMonthIndex(dataPointsArray[2]))
+                differencePoints4 = generateDifferencePoints(dataPointsArray[0], expectationPointsArray[2], getCurrentMonthIndex(dataPointsArray[2]))
+                data = [
+                    {
+                        type: "line",
+                        dataPoints: differencePoints1,
+                        name: "Instructors in Training Difference",
+                        showInLegend: true,
+                    },
+                    {
+                        type: "line",
+                        dataPoints: differencePoints2,
+                        name: "Instructors Difference",
+                        showInLegend: true
+                    },
+                    {
+                        type: "line",
+                        dataPoints: differencePoints3,
+                        name: "Trip Leads Difference",
+                        showInLegend: true
+                    }, 
+                    {
+                        type: "line",
+                        dataPoints: differencePoints4,
+                        name: "Senior Trip Leads Difference",
+                        showInLegend: true
+                    }
+                ];
+                chartDiv = document.createElement("div")
+                chartDiv.setAttribute('id', name)
+                chartDiv.setAttribute('class', "child")
+                chartDiv.setAttribute('style', "height: 300px; width: 100%;")
+                document.getElementById("big").appendChild(chartDiv);
+
+
+                var chart = new CanvasJS.Chart(name, {
+                    animationEnabled: true,
+                    theme: "light2",
+                    title:{
+                        text: name                            },
+                    axisY:{
+                        includeZero: false
+                    },
+                    data: data
+                });
+
+
+
+                chart.render();
+            }
+
+            function generateDifferencePoints(dataPoints, expectationPoints, nowI) {
+                differencePoints = []
+                counter = nowI
+                //console.log(dataPoints)
+                //console.log(expectationPoints)
+                if (expectationPoints == undefined || dataPoints == undefined) {
+                    return differencePoints
+                }
+                for (var i = 0; i < expectationPoints.length; i++) {
+                    if (counter < dataPoints.length) {
+                        differencePoints.push({x: expectationPoints[i]['x'], y: expectationPoints[i]['y'] - dataPoints[counter]['y']})
+                    } else {
+                        differencePoints.push({x: expectationPoints[i]['x'], y: expectationPoints[i]['y']})
+                    }
+                    counter++;
+                }
+                //console.log(differencePoints)
+                return differencePoints
+            }
 
             window.onload = function() {
 
@@ -292,7 +483,9 @@
         </script>
     </head>
     <body>
-        <div id="chartContainer" style="height: 300px; width: 100%;"></div>
-        <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+        <div id = "big">
+            <!--<div id="chartContainer" style="height: 300px; width: 100%;"></div> -->
+            <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+        </div>
     </body>
 </html>
