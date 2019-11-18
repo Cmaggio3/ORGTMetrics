@@ -320,6 +320,52 @@
 
                     }
 
+
+                    //log staff ratio issues
+                    problems = []
+                    keys = Object.keys(sportStrengths);
+                    for (key in keys) {
+                        sport = keys[key];
+                        if (sport.length > 0) {
+                            counts = sportStrengths[sport]["count"]
+                            if (Object.getOwnPropertyNames(counts).length == 0) {
+                                problems.push(sport + " does not have any staff on record");
+                            }
+                            else {
+                                if (isNaN(counts["Senior Trip Leader"])) {
+                                    problems.push(sport + " does not have an active Senior Trip Leader");
+                                }
+                                else if (counts["Senior Trip Leader"] < 2) {
+                                    problems.push(sport + " should have more Senior Trip Leaders");
+                                }
+                                if (isNaN(counts["Trip Leader"])) {
+                                    problems.push(sport + " does not have any active Trip Leaders");
+                                }
+                                else if (counts["Trip Leader"] + counts["SeniorTripLeader"] < 4) {
+                                    problems.push(sport + " does not have enough Trip Leaders");
+                                }
+                                if (isNaN(counts["Instructor"])) {
+                                    problems.push(sport + " does not have any active Instructors");
+                                }
+                                else if (counts["Instructor"] < 5) {
+                                    problems.push(sport + " does not have enough Instructors");
+                                }
+                                if (isNaN(counts["IIT"])) {
+                                    problems.push(sport + " does not have any active IITs");
+                                }
+                                else if (counts["IIT"] < 10) {
+                                    problems.push(sport + " should have more IITs");
+                                }
+                                if (counts["Instructor"] + counts["Trip Leader"] + counts["Senior Trip Leader"]
+                                        < counts["IIT"]/5) {
+                                    problems.push(sport + " does not have enough senior staff");
+                                }
+                            }
+                        }
+                    }
+                    document.getElementById("problem list").innerHTML = problems;
+
+
                     //populate with data from reports
                     for (row in Reports) {
                         //console.log("report number: " + row);
@@ -491,16 +537,21 @@
                     }
                     //count number of people in the sport to display1
                     if ("count" in strengths[sport]) {
-                        strengths[sport]["count"]++;
+                        level = user["Level"].split(" -- ")[0];
+                        if (level in strengths[sport]["count"]) {
+                            strengths[sport]["count"][level] += 1
+                        }
+                        else {
+                            strengths[sport]["count"][level] = 0
+                        }
                     }
                     else {
-                        strengths[sport]["count"] = 0;
+                        strengths[sport]["count"] = {};
                     }
                 }
                 else {
                     strengths[sport] = {};
                 }
-
                 return strengths;
             }
 
@@ -687,15 +738,18 @@
             <div id="barChartContainer" style="height: 370px; width: 100%;"></div>
             <div id="barChartContainerAverage" style="height: 370px; width: 100%;"></div>
 
-            <label>Individuals</label>
-            <p><span id='display1'></span></p>
-            <p><span id='display2'></span></p>
-            <p><span id='display3'></span></p>
+
         </div>
 
     </head>
     <body>
+        <label> Staffing Problems </label>
+        <li id="problem list"></li>
 
+        <label>Individuals</label>
+        <p><span id='display1'></span></p>
+        <p><span id='display2'></span></p>
+        <p><span id='display3'></span></p>
         <div class="ui-widget">
             <label for="person1">person1: </label>
             <input id="person1" onclick="showInput(1);"><br/>
