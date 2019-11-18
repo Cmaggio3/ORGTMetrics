@@ -11,18 +11,6 @@ var md5 = require('MD5');
 var config = require('./config');
 var config = require('./database');
 
-var verifyToken = require('./middleware/verifyToken');
-var addNewUser = require('./middleware/addNewUser');
-var userLoginCheck = require('./middleware/userLoginCheck');
-var findAllUsers = require('./middleware/findAllUsers');
-var welcome = require('./middleware/welcome');
-var findUser = require('./middleware/findUser');
-var findUsersChildren = require('./middleware/findUsersChildren');
-var findAllChildren = require('./middleware/findAllChildren');
-var findChildsForm = require('./middleware/findChildsForm');
-var addNewChild = require('./middleware/addNewChild');
-var sendChildsForm = require('./middleware/sendChildsForm');
-var userSecurityQuestionCheck = require('./middleware/userSecurityQuestionCheck');
 var fullRoster = require('./middleware/fullRoster');
 var tripReports = require('./middleware/tripReports');
 
@@ -43,10 +31,6 @@ app.listen(port, function() {
 });
 
 
-app.post('/signup', addNewUser);
-app.post('/userlogin', userLoginCheck);
-app.post('/userSecurityQuestion',userSecurityQuestionCheck);
-app.post('/children/',addNewChild);
 
 app.get('/roster/',fullRoster);
 app.get('/reports/',tripReports);
@@ -56,14 +40,7 @@ var apiRoutes = express.Router();
 apiRoutes.use(bodyParser.urlencoded({ extended: true }));
 apiRoutes.use(bodyParser.json());
 //route middleware to verify a token
-apiRoutes.use(verifyToken);
-apiRoutes.get('/', welcome);
-apiRoutes.get('/users', findAllUsers);
-apiRoutes.get('/users/:id',findUser);
-apiRoutes.get('/users/:id/children', findUsersChildren);
-apiRoutes.get('/children',findAllChildren);
-apiRoutes.get('/children/:childID/forms/:formName',findChildsForm);
-apiRoutes.post('/children/:childID/forms/:formName',sendChildsForm);
+
 //apiRoutes.post('/children/',addNewChild);
 
 
