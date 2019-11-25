@@ -285,12 +285,16 @@
                         }
 
                         thisYear = 0
+                        months = 0
                         if (user["Status"]!="INACTIVE") {
                             if (user["Status"]=="Undergrad" || user["Status"]=="grad") {
                                 finalDate = new Date(user["Final Date"])
                                 temp = new Date();
                                 if (isNaN(finalDate)) {
                                     finalDate = new Date(temp.getFullYear() + 2,temp.getMonth(),temp.getDate());
+                                    months = 24
+                                } else {
+                                    months = Math.max(dateDistance(temp, finalDate), 0)
                                 }
                                 if (finalDate > new Date(temp.getFullYear(),5,1)) {
                                     thisYear = 1
@@ -307,9 +311,10 @@
                         }
 
 
+
                         sport = tempUsers[row]["Sport"].trim();
                         //add this user to the people structure
-                        people[tempUsers[row]["Name with Sport"].split(" -- ")[0]] = [{},row,nonTechnical,technical,sport,nextYear,thisYear];
+                        people[tempUsers[row]["Name with Sport"].split(" -- ")[0]] = [{},row,nonTechnical,technical,sport,nextYear,thisYear, months, ];
 
                         if (thisYear) {
                             sportStrengths = rosterStrengthAdd(sportStrengths,people,tempUsers[row]);
@@ -501,6 +506,7 @@
 
                     //for passing out of current .when scope
                     temp = people;
+                    console.log(temp)
                     Users = tempUsers;
 
 
@@ -518,6 +524,39 @@
 
                     createBarGraph(sportStrengths,sportStrengthsNextYear,"barChartContainer","Sport Strengths",false);
                     createBarGraph(sportStrengths,sportStrengthsNextYear,"barChartContainerAverage","Averaged Sport Strengths",true);
+                    
+                    sportList = ["Mountain Biking","BikePacking","Cascading","Sea Kayaking","Caving","Rock Climbing","Backpacking","Whitewater Kayaking"]
+                    roleList = ["IITs", "Instructors", "TLs", "STLs"]
+                    //code to generate needed things
+                    for (sInd in sportList) {
+                        //console.log(s)
+                        s = sportList[sInd]
+                        levels = getLeaving(people, s)
+                        //console.log(levels)
+                        prospects = []
+                        for (var ind = 0; ind < 4; ind++) {
+                            //console.log(levels[ind].length)
+                            if (levels[ind].length > 0) {
+                                namesConverted = convertedNames(levels[ind])
+                                var leaving = document.createElement('P')
+                                leavingString = "Leaving " + s + " " + roleList[ind] +": " + namesConverted
+                                //console.log(leavingString)
+                                leaving.innerHTML = leavingString
+                                document.getElementById('replacements').appendChild(leaving)
+                                if (ind > 0) {
+                                    prospect = rankedUsers(people, levels[ind].length + 1, i - 1, s)
+                                    prospects.push(prospect)
+                                    nameString = convertedNames(prospect)
+                                    //console.log(nameString)
+                                    var prosp = document.createElement('P')
+                                    prospString = "Suggested Replacements : " + nameString
+                                    prosp.innerHTML = prospString
+                                    document.getElementById('replacements').appendChild(prosp)
+                                }
+                            } 
+                        }
+                        //console.log(prospects)
+                    }
                 });
 
             }
@@ -691,6 +730,93 @@
                                     " Trips " + JSON.stringify(temp[document.getElementById("person"+number).value][0])
             }
 
+            //ranks users based on time and experience and returns k users
+            //need = 0 need Instructors
+            //need = 1 need TL
+            //need = 2 need STL
+            function rankedUsers(people, k, need, sport) {
+                values = []
+                ranking = []
+                names = []
+                for (i in people) {
+                    user = people[i]
+                    //console.log(i)
+                    demotion = getLevel(user) == need
+                    tripScore = 0
+                    trip = user[0]
+                    names.push(i)
+
+                    for (t in trip) {
+                        if (!isNaN(trip[t])) {
+                                tripScore += 1
+                        }
+                    }
+                    //console.log(user)
+                    if (!demotion && sport == user[4] && user[5] == 1) {
+                        //console.log(user)
+                        //console.log(user[3] + user[2])
+                        //console.log(tripScore)
+                        formula = (Number(user[3]) + Number(user[2]) + tripScore)*(Number(user[7]))
+                        //console.log(formula)
+                        values.push(formula)
+                    } else {
+                        values.push(0)
+                    }
+                }
+                sorted = values.concat([])
+                sorted = sorted.sort(function(a, b){return b-a});
+                console.log(values)
+                console.log(sorted)
+                
+                for (var i = 0; i < Math.min(sorted.length,k); i++) {
+                    ind = values.indexOf(sorted[i])
+                    ranking.push([names[ind],people[names[ind]],values[ind]])
+                }
+                return ranking
+            }
+
+            //
+            function getLeaving(people, sport) {
+                leaving = [[],[],[],[]]
+                for (i in people) {
+                        //console.log(people[i][4])
+                        //console.log(people[i][4] == sport)//people[i][5] == 0 && people[i][6] == 1)
+                    if (people[i][5] == 0 && people[i][6] == 1 && people[i][4] == sport) {
+                        //console.log(people[i])
+                        //console.log(leaving)
+                        leaving[getLevel(people[i])].push([i,people[i]])
+                    }
+                }
+                return leaving
+            }
+
+            function convertedNames(peeps) {
+                string = peeps[0][0]
+                for (var i = 1; i < peeps.length; i++) {
+                    //console.log(peeps[i][0])
+                    string = string + ", " + peeps[i][0]
+                }
+                return string
+            }
+
+            function getLevel(person) {
+                if (!isNaN(person[0]["STL"])) {
+                    return 3
+                } else if (!isNaN(person[0]["TL"])) {
+                    return 2
+                } else if (!isNaN(person[0]["instructor"])) {
+                    return 1
+                } else {
+                    return 0
+                }
+            }
+
+            function dateDistance(date1, date2){
+                var yearDif = date1.getFullYear() - date2.getFullYear()
+                var monthDif = date1.getMonth() - date2.getMonth()
+                return yearDif * 12 + monthDif
+            }
+
             //Get the trip reports from the database
             function getTrips(){
                 return $.ajax({
@@ -732,8 +858,8 @@
         <div>
             <label>Sports</label>
             <select id="sportSelector" onchange="switchSportGraph()">
-                <option value="BikePacking">BikePacking</option>
                 <option value="Mountain Biking">Mountain Biking</option>
+                <option value="BikePacking">BikePacking</option>
                 <option value="Cascading">Cascading</option>
                 <option value="Sea Kayaking">Sea Kayaking</option>
                 <option value="Caving">Caving</option>
@@ -770,6 +896,7 @@
             <label for="person3">person3: </label>
             <input id="person3" onclick="showInput(3);"><br/>
         </div>
+        <div id = "replacements"></div>
 
 
         <div id="chartContainer" style="height: 300px; width: 100%;"></div>
