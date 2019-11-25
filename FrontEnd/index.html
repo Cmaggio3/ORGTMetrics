@@ -294,7 +294,7 @@
                                     finalDate = new Date(temp.getFullYear() + 2,temp.getMonth(),temp.getDate());
                                     months = 24
                                 } else {
-                                    months = Math.max(dateDistance(temp, finalDate), 0)
+                                    months = Math.max(dateDistance(finalDate, temp), 0)
                                 }
                                 if (finalDate > new Date(temp.getFullYear(),5,1)) {
                                     thisYear = 1
@@ -506,7 +506,6 @@
 
                     //for passing out of current .when scope
                     temp = people;
-                    console.log(temp)
                     Users = tempUsers;
 
 
@@ -532,10 +531,9 @@
                         //console.log(s)
                         s = sportList[sInd]
                         levels = getLeaving(people, s)
-                        //console.log(levels)
+                        console.log(levels)
                         prospects = []
                         for (var ind = 0; ind < 4; ind++) {
-                            //console.log(levels[ind].length)
                             if (levels[ind].length > 0) {
                                 namesConverted = convertedNames(levels[ind])
                                 var leaving = document.createElement('P')
@@ -544,7 +542,9 @@
                                 leaving.innerHTML = leavingString
                                 document.getElementById('replacements').appendChild(leaving)
                                 if (ind > 0) {
-                                    prospect = rankedUsers(people, levels[ind].length + 1, i - 1, s)
+                                    //console.log(level[ind])
+                                    prospect = rankedUsers(people, levels[ind].length + 1, ind - 1, s)
+                                    //console.log(prospect)
                                     prospects.push(prospect)
                                     nameString = convertedNames(prospect)
                                     //console.log(nameString)
@@ -741,7 +741,10 @@
                 for (i in people) {
                     user = people[i]
                     //console.log(i)
-                    demotion = getLevel(user) == need
+                    //console.log(user)
+                    //console.log(getLevel(user))
+                    //console.log(need)
+                    promotion = getLevel(user) == need
                     tripScore = 0
                     trip = user[0]
                     names.push(i)
@@ -752,24 +755,28 @@
                         }
                     }
                     //console.log(user)
-                    if (!demotion && sport == user[4] && user[5] == 1) {
+                    if (promotion && sport == user[4] && user[5] == 1) {
                         //console.log(user)
                         //console.log(user[3] + user[2])
                         //console.log(tripScore)
                         formula = (Number(user[3]) + Number(user[2]) + tripScore)*(Number(user[7]))
-                        //console.log(formula)
                         values.push(formula)
+                        //console.log(formula)
                     } else {
                         values.push(0)
+                        //console.log(0)
                     }
                 }
                 sorted = values.concat([])
                 sorted = sorted.sort(function(a, b){return b-a});
-                console.log(values)
-                console.log(sorted)
+                //console.log(values)
+                //console.log(sorted)
                 
                 for (var i = 0; i < Math.min(sorted.length,k); i++) {
                     ind = values.indexOf(sorted[i])
+                    if(sorted[i] == 0) {
+                        return ranking
+                    }
                     ranking.push([names[ind],people[names[ind]],values[ind]])
                 }
                 return ranking
@@ -791,7 +798,10 @@
             }
 
             function convertedNames(peeps) {
-                string = peeps[0][0]
+                string = ""
+                if (peeps.length > 0) {
+                    string = peeps[0][0]
+                }
                 for (var i = 1; i < peeps.length; i++) {
                     //console.log(peeps[i][0])
                     string = string + ", " + peeps[i][0]
