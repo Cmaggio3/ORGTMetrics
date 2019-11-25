@@ -528,26 +528,20 @@
                     roleList = ["IITs", "Instructors", "TLs", "STLs"]
                     //code to generate needed things
                     for (sInd in sportList) {
-                        //console.log(s)
                         s = sportList[sInd]
                         levels = getLeaving(people, s)
-                        console.log(levels)
                         prospects = []
                         for (var ind = 0; ind < 4; ind++) {
                             if (levels[ind].length > 0) {
                                 namesConverted = convertedNames(levels[ind])
                                 var leaving = document.createElement('P')
                                 leavingString = "Leaving " + s + " " + roleList[ind] +": " + namesConverted
-                                //console.log(leavingString)
                                 leaving.innerHTML = leavingString
                                 document.getElementById('replacements').appendChild(leaving)
                                 if (ind > 0) {
-                                    //console.log(level[ind])
                                     prospect = rankedUsers(people, levels[ind].length + 1, ind - 1, s)
-                                    //console.log(prospect)
                                     prospects.push(prospect)
                                     nameString = convertedNames(prospect)
-                                    //console.log(nameString)
                                     var prosp = document.createElement('P')
                                     prospString = "Suggested Replacements : " + nameString
                                     prosp.innerHTML = prospString
@@ -740,26 +734,16 @@
                 names = []
                 for (i in people) {
                     user = people[i]
-                    //console.log(i)
-                    //console.log(user)
-                    //console.log(getLevel(user))
-                    //console.log(need)
                     promotion = getLevel(user) == need
                     tripScore = 0
                     trip = user[0]
                     names.push(i)
 
                     for (t in trip) {
-                        if (!isNaN(trip[t])) {
-                                tripScore += 1
-                        }
+                        tripScore += trip[t]
                     }
-                    //console.log(user)
                     if (promotion && sport == user[4] && user[5] == 1) {
-                        //console.log(user)
-                        //console.log(user[3] + user[2])
-                        //console.log(tripScore)
-                        formula = (Number(user[3]) + Number(user[2]) + tripScore)*(Number(user[7]))
+                        formula = (Number(user[3]) + Number(user[2]) + tripScore)*(Number(user[7])) + Math.random()
                         values.push(formula)
                         //console.log(formula)
                     } else {
@@ -769,8 +753,6 @@
                 }
                 sorted = values.concat([])
                 sorted = sorted.sort(function(a, b){return b-a});
-                //console.log(values)
-                //console.log(sorted)
                 
                 for (var i = 0; i < Math.min(sorted.length,k); i++) {
                     ind = values.indexOf(sorted[i])
@@ -786,11 +768,7 @@
             function getLeaving(people, sport) {
                 leaving = [[],[],[],[]]
                 for (i in people) {
-                        //console.log(people[i][4])
-                        //console.log(people[i][4] == sport)//people[i][5] == 0 && people[i][6] == 1)
                     if (people[i][5] == 0 && people[i][6] == 1 && people[i][4] == sport) {
-                        //console.log(people[i])
-                        //console.log(leaving)
                         leaving[getLevel(people[i])].push([i,people[i]])
                     }
                 }
